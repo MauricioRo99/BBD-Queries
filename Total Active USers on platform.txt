@@ -1,0 +1,14 @@
+select 
+c.course_number, 
+c.name,
+count(*) AS "TOTAL_ACTIVE_USERS"
+from
+CDM_LMS.COURSE C,
+CDM_LMS.PERSON_COURSE pc
+where 
+c.id=pc.course_id
+and pc.course_role_source_code='S'
+and pc.row_deleted_time is null
+and c.available_to_students_ind = true
+group by c.course_number, c.name
+order by 1,2,3
