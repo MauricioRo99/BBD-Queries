@@ -1,0 +1,13 @@
+SELECT 
+c.course_number,
+count(*) as "GRADEBOOK_COLUMNS"
+from 
+CDM_LMS.COURSE c,
+CDM_LMS.GRADEBOOK g,
+CDM_LMS.TERM t
+where 
+c.id=g.course_id
+and t.id=c.term_id
+and t.name in ('') -- Add here the period you want to list
+GROUP BY c.course_number
+order by 1
