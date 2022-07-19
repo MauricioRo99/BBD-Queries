@@ -1,0 +1,18 @@
+-- This query lists all items per course
+select  
+c.course_number,
+ci.item_type,
+count(course_tool_id) as "ITEMS_NUMBER_PER_COURSE"
+FROM
+CDM_LMS.COURSE c,
+CDM_LMS.COURSE_ITEM ci,
+CDM_LMS.COURSE_TOOL ct,
+CDM_LMS.TERM t
+WHERE
+c.id=ci.course_id
+and ci.course_tool_id=ct.id
+and t.id=c.term_id
+and c.AVAILABLE_TO_STUDENTS_IND = TRUE
+and ci.item_type is not null
+group by c.course_number,ci.item_type
+order by 1,2
