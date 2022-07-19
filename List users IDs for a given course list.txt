@@ -1,0 +1,55 @@
+select
+    case
+      when lp.available_ind = true then 'ACTIVE' ELSE 'inactivo 'end AS estatus,
+    lc.course_number AS "COURSE_ID",
+    lc.name as "COURSE_NAME",
+    concat(lp.first_name,' ', lp.last_name) as STUDENT,
+    lp.id as "STUDENT_ID",
+    lp.stage:student_id::string as "ID_STUDENT_BB",
+    lp.institution_role_source_desc as "ROLE"
+from cdm_lms.person lp 
+inner join cdm_lms.person_course lpc 
+    on lpc.person_id = lp.id
+    --and lpc.course_role = 'S' 
+inner join cdm_lms.course lc 
+    on lc.id = lpc.course_id
+left join ( 
+    select
+      person_course_id,
+      count(distinct id) as course_access_count,
+      sum(duration_sum)/60 as course_access_minutes,
+      sum(interaction_cnt) as course_interactions,
+      min(first_accessed_time) as first_course_access,
+      max(last_accessed_time) as last_course_access
+    from cdm_lms.course_activity
+    group by person_course_id
+    ) lca
+    on lca.person_course_id = lpc.id
+left join ( 
+    select
+        person_course_id,
+        count(distinct id) as submission_count,
+        max(submitted_time) as last_submission
+    from cdm_lms.submission
+    group by person_course_id
+    )ls
+    on ls.person_course_id = lpc.id
+left join ( 
+    select
+        person_course_id,
+        normalized_score as total_grade
+    from cdm_lms.grade lg
+    inner join cdm_lms.gradebook lgb
+        on lg.gradebook_id = lgb.id
+    where lgb.final_grade_ind = 1
+        and lg.row_deleted_time is null
+        ) gr
+    on gr.person_course_id = lpc.id
+where
+lp.institution_role_source_desc like 'Prof%'
+and
+lc.course_number in (
+-- Add your course list here closed by ' ' and comma separator
+)
+order by 2
+ 
